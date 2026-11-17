@@ -66,8 +66,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #selectedWorld{font-size:10px;color:#b7f7ca;letter-spacing:1.3px;margin:5px 0 14px}
 #lockBtn{cursor:pointer;position:absolute;z-index:12;right:15px;top:48%;transform:translateY(-50%);padding:10px 13px;min-width:118px;border:1px solid #b7f7ca88;border-radius:11px;background:rgba(10,19,15,.88);color:#eaffef;font-size:10px;font-weight:bold;letter-spacing:.7px;pointer-events:auto;box-shadow:0 4px 16px #0006}
 #lockBtn.active{background:#b7f7ca;color:#102016}
+#viewBtn{cursor:pointer;position:absolute;z-index:12;right:15px;top:calc(48% + 54px);padding:10px 13px;min-width:118px;border:1px solid #8bdcff88;border-radius:11px;background:rgba(10,19,15,.9);color:#eaf8ff;font-size:10px;font-weight:bold;letter-spacing:.7px;pointer-events:auto;box-shadow:0 4px 16px #0006}
+#viewBtn.active{background:#8bdcff;color:#10202a}
 body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
-@media(max-width:560px){#lockBtn{right:9px;top:48%;min-width:105px;padding:9px 10px;font-size:9px}.world-choice{min-height:72px;padding:8px}}
+@media(max-width:560px){#lockBtn{right:9px;top:43%;min-width:105px;padding:9px 10px;font-size:9px}#viewBtn{right:9px;top:calc(43% + 48px);min-width:105px;padding:9px 10px;font-size:9px}.world-choice{min-height:72px;padding:8px}}
 @media(max-width:560px){
  #hud{width:158px;padding:9px 10px;left:8px;top:8px}#hud h2{font-size:14px}.stat{font-size:11px;margin-top:4px}
  #rightHud{right:8px;top:8px;width:154px;gap:7px}.panel{padding:9px 10px}#missionText{font-size:10px}#missionReward{font-size:10px}#minimapWrap{width:118px;height:118px}
@@ -77,7 +79,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
  #bossPanel{bottom:205px}
  #pauseBtn{left:8px;bottom:8px;padding:7px 10px}
 }
-@media(hover:hover) and (pointer:fine){#controls #joystick,#controls .buttons{opacity:.72}#crosshair{display:block}}
+@media(hover:hover) and (pointer:fine){#controls #joystick,#controls .buttons{display:none!important}#crosshair{display:block}}
 </style>
 </head>
 <body>
@@ -129,6 +131,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
 </div>
 <button id="pauseBtn">Ⅱ</button>
 <button id="lockBtn">SHIFT LOCK: OFF</button>
+<button id="viewBtn">VIEW: THIRD PERSON</button>
 
 <div id="startScreen">
   <div class="start-content">
@@ -141,7 +144,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     </div>
     <div id="selectedWorld">SELECTED WORLD: CITY</div>
     <button id="startBtn">ENTER AS WENX</button>
-    <p class="hint">PC: W forward · S backward · A left · D right · SHIFT run · V shift-lock · Right-drag camera · Wheel zoom · Left click / SPACE shoot · Q dash · F blast · C heal · R reload · E car · ESC pause<br><br>Mobile: Left joystick moves · swipe open screen to rotate POV · use action and skill buttons.</p>
+    <p class="hint">PC: W forward · S backward · A left · D right · SHIFT run · V shift-lock · B first/third person · Right-drag camera (move mouse right to look right) · Wheel zoom · Left click / SPACE shoot · Q dash · F blast · C heal · R reload · E car · ESC pause<br><br>Mobile: Left joystick moves · swipe open screen to rotate POV · use action and skill buttons.</p>
   </div>
 </div>
 <div id="pauseScreen">
@@ -194,6 +197,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   let bossWave = 0;
   let worldType = "city";
   let shiftLockOn = false;
+  let cameraMode = "third";
   let toastTimer = 0;
   let mouseHeld = false;
   let touchShootHeld = false;
@@ -1034,6 +1038,15 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     }
   }
   document.getElementById("lockBtn").addEventListener("click", () => setShiftLock(!shiftLockOn));
+  function setCameraMode(mode) {
+    cameraMode = mode;
+    const b = document.getElementById("viewBtn");
+    b.textContent = mode === "first" ? "VIEW: FIRST PERSON" : "VIEW: THIRD PERSON";
+    b.classList.toggle("active", mode === "first");
+    if (playerGroup) playerGroup.visible = mode !== "first";
+    toast(mode === "first" ? "FIRST-PERSON VIEW" : "THIRD-PERSON VIEW");
+  }
+  document.getElementById("viewBtn").addEventListener("click", () => setCameraMode(cameraMode === "third" ? "first" : "third"));
   document.querySelectorAll(".world-choice").forEach(button => {
     button.addEventListener("click", () => {
       const type = button.dataset.world;
@@ -1073,6 +1086,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     if (k === "f" && !e.repeat) useBlast();
     if (k === "c" && !e.repeat) useHeal();
     if (k === "v" && !e.repeat) setShiftLock(!shiftLockOn);
+    if (k === "b" && !e.repeat) setCameraMode(cameraMode === "third" ? "first" : "third");
     if (k === "escape" && !e.repeat && running) togglePause();
   });
   window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
@@ -1108,7 +1122,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   renderer.domElement.addEventListener("pointermove", e => {
     if (cameraPointerId === e.pointerId) {
       const dx = e.clientX - cameraLastX, dy = e.clientY - cameraLastY;
-      cameraYaw -= dx * .006;
+      cameraYaw += dx * .006;
       cameraPitch = Math.max(.12, Math.min(.82, cameraPitch + dy * .004));
       cameraLastX = e.clientX; cameraLastY = e.clientY;
     }
@@ -1120,7 +1134,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   renderer.domElement.addEventListener("pointercancel", stopCameraOrbit);
   document.addEventListener("mousemove", e => {
     if (document.pointerLockElement !== renderer.domElement || !shiftLockOn) return;
-    cameraYaw -= (e.movementX || 0) * .0028;
+    cameraYaw += (e.movementX || 0) * .0028;
     cameraPitch = Math.max(.12, Math.min(.82, cameraPitch + (e.movementY || 0) * .0023));
     pointer.set(0, 0);
     hasMouseAim = true;
@@ -1413,19 +1427,25 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     const rightX = Math.cos(cameraYaw), rightZ = Math.sin(cameraYaw);
     const horizontal = cameraDistance * Math.cos(cameraPitch);
     const vertical = cameraDistance * Math.sin(cameraPitch);
-    const cameraPos = new THREE.Vector3(
-      focus.x + Math.sin(cameraYaw) * horizontal,
-      focus.y + vertical + 1.0,
-      focus.z - Math.cos(cameraYaw) * horizontal
-    );
-    if (shiftLockOn && !player.inCar) {
-      cameraPos.x += rightX * .82;
-      cameraPos.z += rightZ * .82;
-      cameraTarget.set(focus.x + forwardX * 4.2, 1.42, focus.z + forwardZ * 4.2);
+    let cameraPos, targetY;
+    if (cameraMode === "first" && !player.inCar) {
+      cameraPos = new THREE.Vector3(focus.x, focus.y + 1.62, focus.z);
+      cameraTarget.set(focus.x + forwardX * 12, focus.y + 1.48 + Math.sin(cameraPitch) * 2, focus.z + forwardZ * 12);
     } else {
-      cameraTarget.set(focus.x, player.inCar ? 1.15 : 1.35, focus.z);
+      cameraPos = new THREE.Vector3(
+        focus.x + Math.sin(cameraYaw) * horizontal,
+        focus.y + vertical + 1.0,
+        focus.z - Math.cos(cameraYaw) * horizontal
+      );
+      if (shiftLockOn && !player.inCar) {
+        cameraPos.x += rightX * .82;
+        cameraPos.z += rightZ * .82;
+        cameraTarget.set(focus.x + forwardX * 4.2, 1.42, focus.z + forwardZ * 4.2);
+      } else {
+        cameraTarget.set(focus.x, player.inCar ? 1.15 : 1.35, focus.z);
+      }
     }
-    camera.position.lerp(cameraPos, Math.min(1, dt * 7));
+    camera.position.lerp(cameraPos, Math.min(1, dt * (cameraMode === "first" ? 12 : 7)));
     camera.lookAt(cameraTarget);
     updateHUD();
   }
