@@ -30,9 +30,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #bossBar{height:9px;margin-top:7px;background:#ffffff20;border-radius:20px;overflow:hidden}
 #bossBar span{display:block;width:100%;height:100%;background:linear-gradient(90deg,#a92d37,#ff746b);transition:width .12s}
 #bossSub{font-size:10px;color:#e7c4c2;margin-top:4px}
-#crosshair{position:absolute;z-index:4;width:16px;height:16px;border:1px solid #fff9;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%);box-shadow:0 0 6px #0008}
-#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff;width:2px;height:5px;left:6px}
-#crosshair:before{top:-5px}#crosshair:after{bottom:-5px}
+#crosshair{position:absolute;z-index:8;left:50%;top:50%;width:22px;height:22px;pointer-events:none;display:none;transform:translate(-50%,-50%);filter:drop-shadow(0 1px 2px #000)}
+#crosshair .arm{position:absolute;background:#f7fff7;border-radius:1px;box-shadow:0 0 2px #0009}
+#crosshair .top{width:2px;height:6px;left:10px;top:0}
+#crosshair .bottom{width:2px;height:6px;left:10px;bottom:0}
+#crosshair .left{width:6px;height:2px;left:0;top:10px}
+#crosshair .right{width:6px;height:2px;right:0;top:10px}
+#crosshair .dot{position:absolute;width:2px;height:2px;background:#fff;left:10px;top:10px;border-radius:50%}
 #toast{position:absolute;z-index:20;left:50%;top:47%;transform:translate(-50%,-50%);max-width:min(88vw,440px);padding:12px 18px;border-radius:11px;background:rgba(4,9,7,.88);border:1px solid #ffffff25;color:#fff;font-size:13px;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 8px 28px #0005}
 #controls{position:absolute;inset:0;z-index:10;pointer-events:none}
 #joystick{position:absolute;left:22px;bottom:max(25px,env(safe-area-inset-bottom));width:124px;height:124px;border:2px solid #ffffff55;border-radius:50%;background:#ffffff18;pointer-events:auto;touch-action:none;box-shadow:0 4px 18px #0003}
@@ -45,7 +49,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #carBtn{grid-column:2;grid-row:1}
 #shootBtn{grid-column:2;grid-row:2}
 #reloadBtn{grid-column:1;grid-row:2}
-#skillBar{position:absolute;z-index:11;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;pointer-events:auto}
+#skillBar{position:absolute;z-index:11;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:calc(100vw - 18px);pointer-events:auto}
 .skill-btn{cursor:pointer;min-width:70px;height:48px;padding:5px 9px;border:1px solid #ffffff70;border-radius:12px;background:rgba(12,20,27,.9);color:#fff;font-weight:bold;font-size:10px;letter-spacing:.5px;box-shadow:0 4px 15px #0006;touch-action:manipulation}
 .skill-btn span{display:block;font-size:9px;color:#b7f7ca;margin-top:3px}
 .skill-btn:active{transform:scale(.96);background:#365e70}
@@ -68,7 +72,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #lockBtn.active{background:#b7f7ca;color:#102016}
 #viewBtn{cursor:pointer;position:absolute;z-index:12;right:15px;top:calc(48% + 54px);padding:10px 13px;min-width:118px;border:1px solid #8bdcff88;border-radius:11px;background:rgba(10,19,15,.9);color:#eaf8ff;font-size:10px;font-weight:bold;letter-spacing:.7px;pointer-events:auto;box-shadow:0 4px 16px #0006}
 #viewBtn.active{background:#8bdcff;color:#10202a}
-body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
+body.shift-lock-active #crosshair,body.camera-first-person #crosshair{left:50%;top:50%;display:block}
 @media(max-width:560px){#lockBtn{right:9px;top:43%;min-width:105px;padding:9px 10px;font-size:9px}#viewBtn{right:9px;top:calc(43% + 48px);min-width:105px;padding:9px 10px;font-size:9px}.world-choice{min-height:72px;padding:8px}}
 @media(max-width:560px){
  #hud{width:158px;padding:9px 10px;left:8px;top:8px}#hud h2{font-size:14px}.stat{font-size:11px;margin-top:4px}
@@ -79,7 +83,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
  #bossPanel{bottom:205px}
  #pauseBtn{left:8px;bottom:8px;padding:7px 10px}
 }
-@media(hover:hover) and (pointer:fine){#controls #joystick,#controls .buttons{display:none!important}#crosshair{display:block}}
+@media(hover:hover) and (pointer:fine){#controls #joystick,#controls .buttons,#skillBar{display:none!important}}
 </style>
 </head>
 <body>
@@ -112,7 +116,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   <div id="bossBar"><span id="bossFill"></span></div>
   <div id="bossSub">Boss health: 520 / 520</div>
 </div>
-<div id="crosshair"></div>
+<div id="crosshair"><i class="arm top"></i><i class="arm bottom"></i><i class="arm left"></i><i class="arm right"></i><i class="dot"></i></div>
 <div id="toast"></div>
 
 <div id="controls">
@@ -125,13 +129,15 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   </div>
 </div>
 <div id="skillBar">
-  <button class="skill-btn" id="dashBtn">DASH<span>Q · READY</span></button>
-  <button class="skill-btn" id="blastBtn">BLAST<span>F · READY</span></button>
+  <button class="skill-btn" id="dashBtn">SHADOW DASH<span>Q · READY</span></button>
+  <button class="skill-btn" id="blastBtn">SHURIKEN<span>F · READY</span></button>
+  <button class="skill-btn" id="smokeBtn">SMOKE BOMB<span>G · READY</span></button>
   <button class="skill-btn" id="healBtn">HEAL<span>C · READY</span></button>
+  <button class="skill-btn" id="weaponBtn">WEAPON: GUN<span>1 / 2 · SWITCH</span></button>
 </div>
 <button id="pauseBtn">Ⅱ</button>
-<button id="lockBtn">SHIFT LOCK: OFF</button>
-<button id="viewBtn">VIEW: THIRD PERSON</button>
+<button id="lockBtn">SHIFT LOCK: OFF (CTRL)</button>
+<button id="viewBtn">VIEW: FIRST PERSON (B)</button>
 
 <div id="startScreen">
   <div class="start-content">
@@ -144,7 +150,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     </div>
     <div id="selectedWorld">SELECTED WORLD: CITY</div>
     <button id="startBtn">ENTER AS WENX</button>
-    <p class="hint">PC: W forward · S backward · A left · D right · SHIFT run · V shift-lock · B first/third person · Right-drag camera (move mouse right to look right) · Wheel zoom · Left click / SPACE shoot · Q dash · F blast · C heal · R reload · E car · ESC pause<br><br>Mobile: Left joystick moves · swipe open screen to rotate POV · use action and skill buttons.</p>
+    <p class="hint">PC: W/A/S/D move · mouse look (click to capture) · CTRL shift-lock on/off · B first/third person · Left click shoot/slash · 1 gun · 2 katana · Q shadow dash · F shuriken · G smoke bomb · C heal · R reload · E car · SHIFT run · ESC pause<br><br>Mobile: joystick to move · swipe screen to look · action and ninja skill buttons.</p>
   </div>
 </div>
 <div id="pauseScreen">
@@ -197,7 +203,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   let bossWave = 0;
   let worldType = "city";
   let shiftLockOn = false;
-  let cameraMode = "third";
+  let cameraMode = "first";
   let toastTimer = 0;
   let mouseHeld = false;
   let touchShootHeld = false;
@@ -207,7 +213,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   let lastAimPoint = new THREE.Vector3(0, 0, 10);
   let gameTime = 0;
   let cameraYaw = 0;
-  let cameraPitch = 0.30;
+  let cameraPitch = 0;
   let cameraDistance = 11.5;
   let cameraPointerId = null;
   let cameraLastX = 0;
@@ -215,6 +221,10 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   let dashCooldown = 0;
   let blastCooldown = 0;
   let healCooldown = 0;
+  let smokeCooldown = 0;
+  let meleeCooldown = 0;
+  let meleeSwingTime = 0;
+  let weaponMode = "gun";
   let dashTime = 0;
   const dashDirection = new THREE.Vector3(0, 0, 1);
   const skillEffects = [];
@@ -240,8 +250,9 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.82;
 
-  const camera = new THREE.PerspectiveCamera(53, window.innerWidth / window.innerHeight, 0.1, 260);
+  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 260);
   camera.position.set(0, 24, 25);
+  scene.add(camera);
   const cameraTarget = new THREE.Vector3();
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2(0, 0);
@@ -262,6 +273,8 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     skin: new THREE.MeshStandardMaterial({ color: "#d7a27b", roughness: .85 }),
     hair: new THREE.MeshStandardMaterial({ color: "#29231f" }),
     gun: new THREE.MeshStandardMaterial({ color: "#252c2d", metalness: .55, roughness: .38 }),
+    blade: new THREE.MeshStandardMaterial({ color: "#7ee9f5", emissive: "#1b7185", emissiveIntensity: .85, metalness: .72, roughness: .22 }),
+    shuriken: new THREE.MeshStandardMaterial({ color: "#d8e4ed", emissive: "#37586c", emissiveIntensity: .35, metalness: .85, roughness: .22 }),
     enemy: new THREE.MeshStandardMaterial({ color: "#bd6650", roughness: .8 }),
     boss: new THREE.MeshStandardMaterial({ color: "#842d3b", roughness: .7 }),
     bossTrim: new THREE.MeshStandardMaterial({ color: "#e6a34f", metalness: .25, roughness: .4 }),
@@ -278,6 +291,35 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     water: new THREE.MeshStandardMaterial({ color: "#173e4a", roughness: .25, metalness: .08, transparent: true, opacity: .88 }),
     stone: new THREE.MeshStandardMaterial({ color: "#4a5147", roughness: 1 })
   };
+
+  // Simple first-person view models: a compact sidearm and a glowing ninja katana.
+  const viewWeaponRoot = new THREE.Group();
+  camera.add(viewWeaponRoot);
+  const gunView = new THREE.Group();
+  const gunBody = new THREE.Mesh(new THREE.BoxGeometry(.19, .15, .43), mats.gun);
+  gunBody.position.set(0, 0, -.10); gunView.add(gunBody);
+  const gunBarrel = new THREE.Mesh(new THREE.BoxGeometry(.095, .075, .34), mats.gun);
+  gunBarrel.position.set(0, .045, -.43); gunView.add(gunBarrel);
+  const gunGrip = new THREE.Mesh(new THREE.BoxGeometry(.12, .23, .14), mats.gun);
+  gunGrip.position.set(0, -.16, .02); gunGrip.rotation.x = -.18; gunView.add(gunGrip);
+  const gunSight = new THREE.Mesh(new THREE.BoxGeometry(.07, .045, .07), mats.blade);
+  gunSight.position.set(0, .105, -.27); gunView.add(gunSight);
+  gunView.position.set(.34, -.27, -.57);
+  viewWeaponRoot.add(gunView);
+
+  const swordView = new THREE.Group();
+  const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(.075, .055, 1.05), mats.blade);
+  swordBlade.position.set(0, .02, -.69); swordView.add(swordBlade);
+  const swordTip = new THREE.Mesh(new THREE.ConeGeometry(.055, .20, 4), mats.blade);
+  swordTip.rotation.x = -Math.PI / 2; swordTip.position.set(0, .02, -1.31); swordView.add(swordTip);
+  const swordGuard = new THREE.Mesh(new THREE.BoxGeometry(.34, .075, .09), mats.bossTrim);
+  swordGuard.position.set(0, 0, -.12); swordView.add(swordGuard);
+  const swordHandle = new THREE.Mesh(new THREE.CylinderGeometry(.045, .05, .34, 8), mats.gun);
+  swordHandle.position.set(0, -.19, .04); swordView.add(swordHandle);
+  swordView.position.set(.40, -.34, -.60);
+  viewWeaponRoot.add(swordView);
+  viewWeaponRoot.visible = true;
+  swordView.visible = false;
 
   // Lighting and ground
   scene.add(new THREE.HemisphereLight("#8294ad", "#11191d", 0.82));
@@ -772,9 +814,10 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     cash = 500;
     wanted = 0;
     wantedTimer = 0;
-    dashCooldown = 0; blastCooldown = 0; healCooldown = 0; dashTime = 0;
-    cameraYaw = 0; cameraPitch = .30; cameraDistance = 11.5;
+    dashCooldown = 0; blastCooldown = 0; healCooldown = 0; smokeCooldown = 0; meleeCooldown = 0; meleeSwingTime = 0; dashTime = 0;
+    cameraYaw = 0; cameraPitch = cameraMode === "first" ? 0 : .30; cameraDistance = 11.5;
     setShiftLock(false, false);
+    setCameraMode(cameraMode, false);
     populateWorldActors(true);
     document.getElementById("selectedWorld").textContent = `SELECTED WORLD: ${worldType.toUpperCase()}`;
     toast(`${worldType.toUpperCase()} world loaded. You are Wenx. Boss waves are endless!`);
@@ -815,17 +858,35 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
 
   function updateSkillHUD() {
     const skills = [
-      ["dashBtn", dashCooldown, "Q"],
-      ["blastBtn", blastCooldown, "F"],
-      ["healBtn", healCooldown, "C"]
+      ["dashBtn", dashCooldown, "Q", "SHADOW DASH"],
+      ["blastBtn", blastCooldown, "F", "SHURIKEN"],
+      ["smokeBtn", smokeCooldown, "G", "SMOKE BOMB"],
+      ["healBtn", healCooldown, "C", "HEAL"]
     ];
-    for (const [id, cooldown, key] of skills) {
+    for (const [id, cooldown, key, label] of skills) {
       const button = document.getElementById(id);
-      const label = id === "dashBtn" ? "DASH" : (id === "blastBtn" ? "BLAST" : "HEAL");
       button.classList.toggle("cooling", cooldown > 0);
       button.innerHTML = `${label}<span>${key} · ${cooldown > 0 ? cooldown.toFixed(1) + "s" : "READY"}</span>`;
     }
   }
+
+  function updateWeaponHUD() {
+    const isSword = weaponMode === "sword";
+    const action = document.getElementById("shootBtn");
+    action.textContent = isSword ? "SLASH" : "SHOOT";
+    const switcher = document.getElementById("weaponBtn");
+    switcher.innerHTML = isSword ? "WEAPON: KATANA<span>1 / 2 · SWITCH</span>" : "WEAPON: GUN<span>1 / 2 · SWITCH</span>";
+    gunView.visible = !isSword;
+    swordView.visible = isSword;
+    viewWeaponRoot.visible = cameraMode === "first" && !player.inCar;
+  }
+
+  function setWeaponMode(mode) {
+    weaponMode = mode;
+    updateWeaponHUD();
+    toast(mode === "sword" ? "KATANA EQUIPPED — left click to slash." : "SIDEARM EQUIPPED — left click to shoot.");
+  }
+  function toggleWeapon() { setWeaponMode(weaponMode === "gun" ? "sword" : "gun"); }
 
   function reload() {
     if (!running || paused || reloadTimer > 0 || ammo === MAX_AMMO || reserveAmmo <= 0) return;
@@ -834,30 +895,40 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   }
 
   function getAimDirection() {
-    const origin = playerGroup.position;
-    let target = null;
-    if (hasMouseAim) {
-      raycaster.setFromCamera(pointer, camera);
-      if (raycaster.ray.intersectPlane(groundPlane, rayPoint)) target = rayPoint.clone();
-    }
-    if (!target) {
-      let nearest = null, nearestD = 28;
-      for (const e of enemies) {
-        if (e.dead) continue;
-        const d = Math.hypot(e.group.position.x - origin.x, e.group.position.z - origin.z);
-        if (d < nearestD) { nearestD = d; nearest = e; }
-      }
-      if (nearest) target = nearest.group.position.clone();
-    }
-    if (!target) target = origin.clone().add(player.facing.clone().multiplyScalar(18));
-    const dir = new THREE.Vector3(target.x - origin.x, 0, target.z - origin.z);
+    // FPS and shift-lock always fire through the exact center of the screen, like a tactical FPS.
+    const centeredAim = cameraMode === "first" || shiftLockOn || document.pointerLockElement === renderer.domElement;
+    const aimPoint = centeredAim ? new THREE.Vector2(0, 0) : pointer;
+    raycaster.setFromCamera(aimPoint, camera);
+    const look = raycaster.ray.direction;
+    const dir = new THREE.Vector3(look.x, 0, look.z);
     if (dir.lengthSq() < .001) dir.copy(player.facing);
-    dir.normalize();
-    return dir;
+    return dir.normalize();
+  }
+
+  function meleeAttack() {
+    if (!running || paused || player.inCar || meleeCooldown > 0) return;
+    const dir = getAimDirection();
+    player.facing.copy(dir);
+    playerGroup.rotation.y = Math.atan2(dir.x, dir.z);
+    meleeCooldown = .52;
+    meleeSwingTime = .30;
+    const origin = playerGroup.position;
+    let hits = 0;
+    for (const e of enemies) {
+      if (e.dead) continue;
+      const dx = e.group.position.x - origin.x, dz = e.group.position.z - origin.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist > 4.0 || dist < .01) continue;
+      const facingDot = (dx * dir.x + dz * dir.z) / dist;
+      if (facingDot > -.12) { hitEnemy(e, e.isBoss ? 58 : 105); hits++; }
+    }
+    addWaveEffect(origin.x + dir.x * 1.55, origin.z + dir.z * 1.55, "#74e8ff", .28);
+    toast(hits ? `KATANA SLASH! ${hits} target${hits === 1 ? "" : "s"} hit.` : "KATANA SLASH!");
   }
 
   function fire() {
     if (!running || paused || player.inCar || reloadTimer > 0) return;
+    if (weaponMode === "sword") { meleeAttack(); return; }
     if (ammo <= 0) {
       if (reserveAmmo > 0) reload();
       else toast("No ammo! Find an ammo pickup.");
@@ -910,21 +981,41 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
 
   function useBlast() {
     if (!running || paused || player.inCar || blastCooldown > 0) return;
-    blastCooldown = 12;
+    blastCooldown = 4.8;
     const origin = playerGroup.position;
-    addWaveEffect(origin.x, origin.z, "#8cecff", .62);
-    let struck = 0;
+    const aim = getAimDirection();
+    const spreads = [-.13, 0, .13];
+    for (const spread of spreads) {
+      const c = Math.cos(spread), sn = Math.sin(spread);
+      const dir = new THREE.Vector3(aim.x * c - aim.z * sn, 0, aim.x * sn + aim.z * c).normalize();
+      const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(.24, 0), mats.shuriken);
+      mesh.position.set(origin.x + dir.x * .85, 1.48, origin.z + dir.z * .85);
+      scene.add(mesh);
+      bullets.push({ mesh, velocity: dir.multiplyScalar(39), life: 1.65, damage: 43 });
+    }
+    addWaveEffect(origin.x, origin.z, "#8cecff", .34);
+    toast("SHURIKEN VOLLEY! Three ninja stars launched.");
+    updateSkillHUD();
+  }
+
+  function useSmokeBomb() {
+    if (!running || paused || player.inCar || smokeCooldown > 0) return;
+    smokeCooldown = 14;
+    damageCooldown = Math.max(damageCooldown, 1.0);
+    const cloud = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 9), new THREE.MeshBasicMaterial({ color: "#78869b", transparent: true, opacity: .20, depthWrite: false }));
+    cloud.position.set(playerGroup.position.x, 1.25, playerGroup.position.z);
+    cloud.scale.set(1.8, 1.2, 1.8);
+    scene.add(cloud);
+    skillEffects.push({ mesh: cloud, life: 1.0, maxLife: 1.0 });
+    addWaveEffect(playerGroup.position.x, playerGroup.position.z, "#9e9bff", .8);
+    let hits = 0;
     for (const e of enemies) {
       if (e.dead) continue;
-      const dx = e.group.position.x - origin.x, dz = e.group.position.z - origin.z;
+      const dx = e.group.position.x - playerGroup.position.x, dz = e.group.position.z - playerGroup.position.z;
       const d = Math.hypot(dx, dz);
-      if (d <= 9.5) {
-        hitEnemy(e, e.isBoss ? 78 : 100);
-        if (!e.dead && d > .01) moveWithCollision(e.group, dx / d * (e.isBoss ? 1.2 : 2.2), dz / d * (e.isBoss ? 1.2 : 2.2), e.isBoss ? 1.15 : .55);
-        struck++;
-      }
+      if (d < 7.5) { hitEnemy(e, e.isBoss ? 28 : 44); hits++; }
     }
-    toast(struck ? `ENERGY BLAST! Hit ${struck} enemy${struck === 1 ? "" : "ies"}.` : "ENERGY BLAST! No enemies in range.");
+    toast(`SMOKE BOMB! Brief protection${hits ? ` · ${hits} enemies struck` : ""}.`);
     updateSkillHUD();
   }
 
@@ -988,6 +1079,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     if (d > 5.7) { toast("Move closer to the red car first."); return; }
     player.inCar = true;
     playerGroup.visible = false;
+    viewWeaponRoot.visible = false;
     car.speed = 0;
     toast("Vehicle entered. Drive with WASD!");
     updateHUD();
@@ -995,7 +1087,8 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
 
   function exitCar() {
     player.inCar = false;
-    playerGroup.visible = true;
+    playerGroup.visible = cameraMode !== "first";
+    viewWeaponRoot.visible = cameraMode === "first";
     const angle = car.angle + Math.PI / 2;
     const x = car.group.position.x + Math.sin(angle) * 2.4;
     const z = car.group.position.z + Math.cos(angle) * 2.4;
@@ -1017,34 +1110,44 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   bindHold("carBtn", value => { if (value) interactCar(); });
   document.getElementById("dashBtn").addEventListener("click", useDash);
   document.getElementById("blastBtn").addEventListener("click", useBlast);
+  document.getElementById("smokeBtn").addEventListener("click", useSmokeBomb);
   document.getElementById("healBtn").addEventListener("click", useHeal);
+  document.getElementById("weaponBtn").addEventListener("click", toggleWeapon);
 
   function setShiftLock(enabled, requestCapture = true) {
     shiftLockOn = !!enabled;
     document.body.classList.toggle("shift-lock-active", shiftLockOn);
     const button = document.getElementById("lockBtn");
     button.classList.toggle("active", shiftLockOn);
-    button.textContent = shiftLockOn ? "SHIFT LOCK: ON" : "SHIFT LOCK: OFF";
+    button.textContent = shiftLockOn ? "SHIFT LOCK: ON (CTRL)" : "SHIFT LOCK: OFF (CTRL)";
     if (shiftLockOn) {
-      pointer.set(0, 0);
-      hasMouseAim = true;
-      if (requestCapture && renderer.domElement.requestPointerLock && !/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      pointer.set(0, 0); hasMouseAim = true;
+      if (requestCapture && renderer.domElement.requestPointerLock && window.matchMedia("(pointer:fine)").matches) {
         try { renderer.domElement.requestPointerLock(); } catch (_) {}
       }
-      toast("SHIFT LOCK ON — camera and Wenx are now aligned.");
+      toast("MOUSE LOCK ON — move your mouse to aim and look.");
     } else {
       if (document.pointerLockElement === renderer.domElement && document.exitPointerLock) document.exitPointerLock();
-      toast("SHIFT LOCK OFF — free camera mode.");
+      toast("MOUSE LOCK OFF — click the game or press CTRL to lock again.");
     }
   }
   document.getElementById("lockBtn").addEventListener("click", () => setShiftLock(!shiftLockOn));
-  function setCameraMode(mode) {
+  function setCameraMode(mode, requestCapture = true) {
     cameraMode = mode;
+    document.body.classList.toggle("camera-first-person", mode === "first");
     const b = document.getElementById("viewBtn");
-    b.textContent = mode === "first" ? "VIEW: FIRST PERSON" : "VIEW: THIRD PERSON";
+    b.textContent = mode === "first" ? "VIEW: FIRST PERSON (B)" : "VIEW: THIRD PERSON (B)";
     b.classList.toggle("active", mode === "first");
     if (playerGroup) playerGroup.visible = mode !== "first";
-    toast(mode === "first" ? "FIRST-PERSON VIEW" : "THIRD-PERSON VIEW");
+    viewWeaponRoot.visible = mode === "first" && !player.inCar;
+    if (mode === "first") {
+      cameraPitch = 0; pointer.set(0, 0); hasMouseAim = true;
+      if (requestCapture && running && window.matchMedia("(pointer:fine)").matches) setShiftLock(true, true);
+    } else {
+      cameraPitch = Math.max(.12, cameraPitch || .28);
+    }
+    updateWeaponHUD();
+    toast(mode === "first" ? "FIRST-PERSON FPS VIEW" : "THIRD-PERSON VIEW");
   }
   document.getElementById("viewBtn").addEventListener("click", () => setCameraMode(cameraMode === "third" ? "first" : "third"));
   document.querySelectorAll(".world-choice").forEach(button => {
@@ -1085,7 +1188,10 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     if (k === "q" && !e.repeat) useDash();
     if (k === "f" && !e.repeat) useBlast();
     if (k === "c" && !e.repeat) useHeal();
-    if (k === "v" && !e.repeat) setShiftLock(!shiftLockOn);
+    if (k === "g" && !e.repeat) useSmokeBomb();
+    if (k === "1" && !e.repeat) setWeaponMode("gun");
+    if (k === "2" && !e.repeat) setWeaponMode("sword");
+    if (k === "control" && !e.repeat) { e.preventDefault(); setShiftLock(!shiftLockOn); }
     if (k === "b" && !e.repeat) setCameraMode(cameraMode === "third" ? "first" : "third");
     if (k === "escape" && !e.repeat && running) togglePause();
   });
@@ -1095,7 +1201,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   const crosshair = document.getElementById("crosshair");
   renderer.domElement.addEventListener("pointermove", e => {
     if (e.pointerType !== "mouse" || document.pointerLockElement === renderer.domElement) return;
-    if (shiftLockOn) { pointer.set(0, 0); return; }
+    if (cameraMode === "first" || shiftLockOn) { pointer.set(0, 0); hasMouseAim = true; return; }
     const r = renderer.domElement.getBoundingClientRect();
     pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
     pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
@@ -1105,7 +1211,12 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     crosshair.style.display = "block";
   });
   renderer.domElement.addEventListener("pointerdown", e => {
-    if (e.pointerType === "mouse" && e.button === 0) { mouseHeld = true; fire(); }
+    if (e.pointerType === "mouse" && e.button === 0) {
+      if (running && cameraMode === "first" && document.pointerLockElement !== renderer.domElement && renderer.domElement.requestPointerLock) {
+        try { renderer.domElement.requestPointerLock(); } catch (_) {}
+      }
+      mouseHeld = true; fire();
+    }
   });
   window.addEventListener("pointerup", e => { if (e.pointerType === "mouse") mouseHeld = false; });
   // Camera controls: right mouse drag on desktop, swipe on open canvas space on touch.
@@ -1122,8 +1233,10 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   renderer.domElement.addEventListener("pointermove", e => {
     if (cameraPointerId === e.pointerId) {
       const dx = e.clientX - cameraLastX, dy = e.clientY - cameraLastY;
-      cameraYaw += dx * .006;
-      cameraPitch = Math.max(.12, Math.min(.82, cameraPitch + dy * .004));
+      cameraYaw -= dx * .006;
+      cameraPitch = cameraMode === "first"
+        ? Math.max(-1.12, Math.min(1.12, cameraPitch - dy * .004))
+        : Math.max(.08, Math.min(1.08, cameraPitch + dy * .004));
       cameraLastX = e.clientX; cameraLastY = e.clientY;
     }
   });
@@ -1133,22 +1246,26 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   renderer.domElement.addEventListener("pointerup", stopCameraOrbit);
   renderer.domElement.addEventListener("pointercancel", stopCameraOrbit);
   document.addEventListener("mousemove", e => {
-    if (document.pointerLockElement !== renderer.domElement || !shiftLockOn) return;
-    cameraYaw += (e.movementX || 0) * .0028;
-    cameraPitch = Math.max(.12, Math.min(.82, cameraPitch + (e.movementY || 0) * .0023));
+    if (document.pointerLockElement !== renderer.domElement) return;
+    const dx = e.movementX || 0, dy = e.movementY || 0;
+    // Standard FPS mouse feel: mouse right looks right; mouse up looks up.
+    cameraYaw -= dx * .0024;
+    cameraPitch = cameraMode === "first"
+      ? Math.max(-1.12, Math.min(1.12, cameraPitch - dy * .0022))
+      : Math.max(.08, Math.min(1.08, cameraPitch + dy * .0022));
     pointer.set(0, 0);
     hasMouseAim = true;
   });
   document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement !== renderer.domElement && shiftLockOn) {
-      shiftLockOn = false;
-      document.body.classList.remove("shift-lock-active");
-      const button = document.getElementById("lockBtn");
-      button.classList.remove("active"); button.textContent = "SHIFT LOCK: OFF";
-    }
+    const locked = document.pointerLockElement === renderer.domElement;
+    shiftLockOn = locked;
+    document.body.classList.toggle("shift-lock-active", locked);
+    const button = document.getElementById("lockBtn");
+    button.classList.toggle("active", locked);
+    button.textContent = locked ? "SHIFT LOCK: ON (CTRL)" : "SHIFT LOCK: OFF (CTRL)";
   });
   renderer.domElement.addEventListener("wheel", e => {
-    cameraDistance = Math.max(7.5, Math.min(18, cameraDistance + e.deltaY * .012));
+    if (cameraMode !== "first") cameraDistance = Math.max(7.5, Math.min(18, cameraDistance + e.deltaY * .012));
   }, { passive: true });
   renderer.domElement.addEventListener("contextmenu", e => e.preventDefault());
 
@@ -1167,6 +1284,8 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     startScreen.style.display = "none";
     running = true;
     paused = false;
+    setCameraMode("first", false);
+    if (window.matchMedia("(pointer:fine)").matches) setShiftLock(true, true);
     toast(`Welcome, Wenx. Explore the ${worldType} and hunt endless boss waves!`);
   });
 
@@ -1398,6 +1517,14 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     dashCooldown = Math.max(0, dashCooldown - dt);
     blastCooldown = Math.max(0, blastCooldown - dt);
     healCooldown = Math.max(0, healCooldown - dt);
+    smokeCooldown = Math.max(0, smokeCooldown - dt);
+    meleeCooldown = Math.max(0, meleeCooldown - dt);
+    if (meleeSwingTime > 0) {
+      meleeSwingTime = Math.max(0, meleeSwingTime - dt);
+      const progress = 1 - meleeSwingTime / .30;
+      swordView.rotation.y = -.9 + progress * 1.8;
+      swordView.rotation.x = Math.sin(progress * Math.PI) * -.22;
+    } else { swordView.rotation.y = 0; swordView.rotation.x = 0; }
     updateSkillHUD();
     if (reloadTimer > 0) {
       reloadTimer -= dt;
@@ -1411,7 +1538,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
       }
     }
     updatePlayer(dt);
-    if ((mouseHeld || touchShootHeld || keys[" "]) && shootCooldown <= 0) fire();
+    if ((mouseHeld || touchShootHeld || keys[" "]) && (weaponMode === "sword" ? meleeCooldown <= 0 : shootCooldown <= 0)) fire();
     updateEnemies(dt);
     updateProjectiles(dt);
     updateSkillEffects(dt);
@@ -1425,13 +1552,19 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     const focus = player.inCar ? car.group.position : playerGroup.position;
     const forwardX = -Math.sin(cameraYaw), forwardZ = Math.cos(cameraYaw);
     const rightX = Math.cos(cameraYaw), rightZ = Math.sin(cameraYaw);
-    const horizontal = cameraDistance * Math.cos(cameraPitch);
-    const vertical = cameraDistance * Math.sin(cameraPitch);
-    let cameraPos, targetY;
+    let cameraPos;
     if (cameraMode === "first" && !player.inCar) {
+      // Valorant-like FPS: camera is at Wenx's eye position and aims along yaw + pitch.
+      const cp = Math.cos(cameraPitch), sp = Math.sin(cameraPitch);
       cameraPos = new THREE.Vector3(focus.x, focus.y + 1.62, focus.z);
-      cameraTarget.set(focus.x + forwardX * 12, focus.y + 1.48 + Math.sin(cameraPitch) * 2, focus.z + forwardZ * 12);
+      cameraTarget.set(focus.x + forwardX * cp * 24, focus.y + 1.62 + sp * 24, focus.z + forwardZ * cp * 24);
+      camera.position.copy(cameraPos);
+      camera.lookAt(cameraTarget);
+      viewWeaponRoot.visible = !player.inCar;
     } else {
+      const thirdPitch = Math.max(.08, Math.min(1.08, cameraPitch));
+      const horizontal = cameraDistance * Math.cos(thirdPitch);
+      const vertical = cameraDistance * Math.sin(thirdPitch);
       cameraPos = new THREE.Vector3(
         focus.x + Math.sin(cameraYaw) * horizontal,
         focus.y + vertical + 1.0,
@@ -1444,9 +1577,10 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
       } else {
         cameraTarget.set(focus.x, player.inCar ? 1.15 : 1.35, focus.z);
       }
+      camera.position.lerp(cameraPos, Math.min(1, dt * 7));
+      camera.lookAt(cameraTarget);
+      viewWeaponRoot.visible = false;
     }
-    camera.position.lerp(cameraPos, Math.min(1, dt * (cameraMode === "first" ? 12 : 7)));
-    camera.lookAt(cameraTarget);
     updateHUD();
   }
 
@@ -1530,6 +1664,8 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
   }
   window.addEventListener("resize", resize);
+  setCameraMode(cameraMode, false);
+  setWeaponMode("gun");
   updateHUD();
   updateSkillHUD();
 })();
