@@ -38,7 +38,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #joystick{position:absolute;left:22px;bottom:max(25px,env(safe-area-inset-bottom));width:124px;height:124px;border:2px solid #ffffff55;border-radius:50%;background:#ffffff18;pointer-events:auto;touch-action:none;box-shadow:0 4px 18px #0003}
 #stick{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px;border-radius:50%;background:#dff7e6cc;border:2px solid #fff;box-shadow:0 3px 12px #0007;pointer-events:none}
 .buttons{position:absolute;right:18px;bottom:max(22px,env(safe-area-inset-bottom));display:grid;grid-template-columns:68px 68px;gap:9px;pointer-events:auto}
-.game-btn{width:68px;height:68px;border-radius:50%;border:1.5px solid #ffffff78;background:rgba(10,19,15,.82);color:#fff;font-size:11px;font-weight:bold;letter-spacing:.4px;touch-action:none;box-shadow:0 4px 15px #0005}
+.game-btn{cursor:pointer;width:68px;height:68px;border-radius:50%;border:1.5px solid #ffffff78;background:rgba(10,19,15,.82);color:#fff;font-size:11px;font-weight:bold;letter-spacing:.4px;touch-action:none;box-shadow:0 4px 15px #0005}
 .game-btn:active{background:#427d58;transform:scale(.95)}
 #shootBtn{background:rgba(120,35,35,.88);border-color:#ffb6a8}
 #runBtn{grid-column:1;grid-row:1}
@@ -46,25 +46,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0c1219;font-family:
 #shootBtn{grid-column:2;grid-row:2}
 #reloadBtn{grid-column:1;grid-row:2}
 #skillBar{position:absolute;z-index:11;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;pointer-events:auto}
-.skill-btn{min-width:70px;height:48px;padding:5px 9px;border:1px solid #ffffff70;border-radius:12px;background:rgba(12,20,27,.9);color:#fff;font-weight:bold;font-size:10px;letter-spacing:.5px;box-shadow:0 4px 15px #0006;touch-action:manipulation}
+.skill-btn{cursor:pointer;min-width:70px;height:48px;padding:5px 9px;border:1px solid #ffffff70;border-radius:12px;background:rgba(12,20,27,.9);color:#fff;font-weight:bold;font-size:10px;letter-spacing:.5px;box-shadow:0 4px 15px #0006;touch-action:manipulation}
 .skill-btn span{display:block;font-size:9px;color:#b7f7ca;margin-top:3px}
 .skill-btn:active{transform:scale(.96);background:#365e70}
 .skill-btn.cooling{opacity:.48}
-#pauseBtn{position:absolute;z-index:12;left:12px;bottom:max(12px,env(safe-area-inset-bottom));padding:9px 13px;border:1px solid #ffffff55;border-radius:9px;background:#101714cc;color:white;pointer-events:auto}
+#pauseBtn{cursor:pointer;position:absolute;z-index:12;left:12px;bottom:max(12px,env(safe-area-inset-bottom));padding:9px 13px;border:1px solid #ffffff55;border-radius:9px;background:#101714cc;color:white;pointer-events:auto}
 #startScreen,#pauseScreen{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:22px;text-align:center;background:radial-gradient(ellipse at 50% 35%,#202f3c 0%,#111b25 48%,#080d13 100%);color:#fff}
 #pauseScreen{display:none;z-index:25;background:rgba(6,12,9,.72);backdrop-filter:blur(7px)}
 .start-content{width:min(490px,95vw);padding:28px 24px;border:1px solid #ffffff2c;border-radius:22px;background:rgba(7,14,10,.55);box-shadow:0 20px 70px #0006}
 .start-content h1{font-size:clamp(34px,8vw,58px);letter-spacing:3px;color:var(--mint);text-shadow:0 5px 25px #6bda8b44}
 .start-content .tag{font-size:11px;letter-spacing:3px;color:#d0dfd3;margin-top:3px}
 .start-content p{font-size:13px;line-height:1.7;color:#d1dfd5;margin:16px 0 21px}
-#startBtn,#resumeBtn{border:0;border-radius:30px;padding:14px 32px;background:var(--mint);color:#102016;font-size:14px;font-weight:bold;letter-spacing:1px;box-shadow:0 7px 25px #89e7a444}
+#startBtn,#resumeBtn{cursor:pointer;border:0;border-radius:30px;padding:14px 32px;background:var(--mint);color:#102016;font-size:14px;font-weight:bold;letter-spacing:1px;box-shadow:0 7px 25px #89e7a444}
 .hint{font-size:10px!important;color:#98aa9d!important;margin:17px 0 0!important}
 .world-choices{display:flex;gap:12px;justify-content:center;margin:18px 0 12px}
 .world-choice{flex:1;max-width:175px;min-height:78px;border:1px solid #ffffff50;border-radius:14px;background:rgba(255,255,255,.07);color:#fff;padding:10px 12px;font-weight:bold;letter-spacing:1px;cursor:pointer}
 .world-choice span{display:block;font-size:10px;color:#a9bcb0;font-weight:normal;letter-spacing:.2px;margin-top:6px;line-height:1.35}
 .world-choice.selected{border-color:#b7f7ca;background:rgba(112,205,143,.18);box-shadow:0 0 0 1px #b7f7ca55,0 8px 24px #72d99522}
 #selectedWorld{font-size:10px;color:#b7f7ca;letter-spacing:1.3px;margin:5px 0 14px}
-#lockBtn{position:absolute;z-index:12;right:15px;top:48%;transform:translateY(-50%);padding:10px 13px;min-width:118px;border:1px solid #b7f7ca88;border-radius:11px;background:rgba(10,19,15,.88);color:#eaffef;font-size:10px;font-weight:bold;letter-spacing:.7px;pointer-events:auto;box-shadow:0 4px 16px #0006}
+#lockBtn{cursor:pointer;position:absolute;z-index:12;right:15px;top:48%;transform:translateY(-50%);padding:10px 13px;min-width:118px;border:1px solid #b7f7ca88;border-radius:11px;background:rgba(10,19,15,.88);color:#eaffef;font-size:10px;font-weight:bold;letter-spacing:.7px;pointer-events:auto;box-shadow:0 4px 16px #0006}
 #lockBtn.active{background:#b7f7ca;color:#102016}
 body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
 @media(max-width:560px){#lockBtn{right:9px;top:48%;min-width:105px;padding:9px 10px;font-size:9px}.world-choice{min-height:72px;padding:8px}}
@@ -91,6 +91,7 @@ body.shift-lock-active #crosshair{left:50%;top:50%;display:block}
   <div class="stat"><span>💵 CASH</span><strong>$<span id="cash">500</span></strong></div>
   <div class="stat"><span>🔫 AMMO</span><strong id="ammo">12 / 72</strong></div>
   <div class="bar" id="ammoBar"><span id="ammoFill"></span></div>
+  <div class="stat"><span>🌍 WORLD</span><strong id="worldName">CITY</strong></div>
   <div class="stat"><span>🚗 STATUS</span><strong id="status">On foot</strong></div>
   <div class="stat"><span>🚨 HEAT</span><strong id="wanted">☆☆☆☆☆</strong></div>
 </div>
